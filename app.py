@@ -1,6 +1,6 @@
 """Blogly application."""
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect
 from models import connect_db, User, db
 
 
@@ -13,20 +13,20 @@ app.config['SQLALCHEMY_ECHO'] = True
 from flask_debugtoolbar import DebugToolbarExtension
 
 app.config['SECRET_KEY'] = "SECRET!"
-debug = DebugToolbarExtension(app)
+#debug = DebugToolbarExtension(app)
 
 
 connect_db(app)
 db.create_all()
 
 @app.get('/')
-def list_users():
+def redirect_to_users():
     """List users and show add form"""
 
-    users = User.query.all()
-    return render_template('current-users.html', users=users)
+    return redirect('/users')
+    
 
-@app.get('/add-user-form')
+@app.get('/users/new')
 def show_add_user_form():
     """ Display the form to add a user """
     return render_template('list.html')
@@ -43,3 +43,44 @@ def create_display_user():
     db.session.commit()
 
     return render_template('user.html', user=user)
+
+@app.get('/users')
+def list_users():
+    """List users and show add form"""
+
+    users = User.query.all()
+    return render_template('current-users.html', users=users)
+
+@app.get('/user/<int:id>')
+def display_user(id):
+    """displays user details"""
+
+    user = User.query.get_or_404(id)
+    return render_template('user.html', user=user)
+
+@app.get('/user/<int:id>/edit')
+def display_edit_user(id):
+    """displays user edit page"""
+    user = User.query.get_or_404(id)
+    return render_template('edit.html', user=user)
+
+
+@app.post('/user/<int:id>/edit')
+def update_user(id):
+    """ updating user details and render the users page"""
+    user = User.query.get_or_404(id)
+    user.first_name = request.form['first_name']
+    user.last_name = request.form['last_name']
+    user.image_url = request.form['image_url']
+
+    db.session.commit()
+    return render_template('user.html', user=user)
+    
+
+@app.post('/user/<int:id>/delete')
+def delete_user(id):
+    """ delete user and redirects to home page """
+    user = User.query.get_or_404(id)
+    db.session.delete(user)
+    db.session.commit()
+    return redirect('/')
