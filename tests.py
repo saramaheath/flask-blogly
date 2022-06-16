@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from app import app, db
-from models import DEFAULT_IMAGE_URL, User
+from models import DEFAULT_IMAGE_URL, User, Post
 
 # Let's configure our app to use a different database for tests
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql:///blogly_tests"
@@ -28,7 +28,9 @@ class UserViewTestCase(TestCase):
         # As you add more models later in the exercise, you'll want to delete
         # all of their records before each test just as we're doing with the
         # User model below.
+        Post.query.delete()
         User.query.delete()
+        
 
         self.client = app.test_client()
 
@@ -75,7 +77,72 @@ class UserViewTestCase(TestCase):
     def test_add_user(self):
         with self.client as c:
             resp = c.post(
-                "/add-user", data={'first_name': 'Jordan', 'last_name': 'Asano', 'image_url': ''})
+                "/add-user",
+                data={
+                    'first_name': 'Jordan',
+                    'last_name': 'Asano',
+                    'image_url': ''}
+            )
             self.assertEqual(resp.status_code, 200)
             html = resp.get_data(as_text=True)
             self.assertIn("<!-- User page shown -->", html)
+            self.assertIn("Jordan Asano", html)
+
+    def test_display_user(self):
+        with self.client as c:
+            resp = c.get(f"/user/{User.query.first().id}")
+            self.assertEqual(resp.status_code, 200)
+            html = resp.get_data(as_text=True)
+            self.assertIn("<!-- User page shown -->", html)
+
+    def test_display_edit_user(self):
+        with self.client as c:
+            resp = c.get(f"/user/{User.query.first().id}/edit")
+            self.assertEqual(resp.status_code, 200)
+            html = resp.get_data(as_text=True)
+            self.assertIn("<!-- Edit user page shown -->", html)
+
+    def test_edit_user(self):
+        with self.client as c:
+            user = User.query.first()
+            resp = c.post(
+                f"/user/{user.id}/edit",
+                data={
+                    'first_name': 'Sara',
+                    "last_name": "Heath",
+                    'image_url': ''}
+            )
+            self.assertEqual(resp.status_code, 200)
+            html = resp.get_data(as_text=True)
+            self.assertIn("<!-- User page shown -->", html)
+            self.assertIn("Sara Heath", html)
+
+    def test_delete_user(self):
+        with self.client as c:
+            user = User.query.first()
+            resp = c.post(f"/user/{user.id}/delete")
+            self.assertEqual(resp.status_code, 302)
+            html = resp.get_data(as_text=True)
+            self.assertIn('<a href="/">', html)
+
+    def test_display_add_post_form(self):
+        with self.client as c:
+            user = User.query.first()
+            resp = c.get(f"/add-post/{user.id}")
+            self.assertEqual(resp.status_code, 200)
+            html = resp.get_data(as_text=True)
+            self.assertIn('<!-- Add post form shown -->', html)
+
+    def test_add_post(self):
+        with self.client as c:
+            user = User.query.first()
+            resp = c.post(
+                f"/add-post/{user.id}",
+                data={'title': 'Yo', 'content': 'hi'}
+            )
+            self.assertEqual(resp.status_code, 200)
+            html = resp.get_data(as_text=True)
+            self.assertIn('<!-- Post page shown -->', html)
+            self.assertIn('Yo', html)
+            self.assertIn('hi', html)
+

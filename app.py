@@ -24,6 +24,14 @@ def redirect_to_users():
     return redirect('/users')
 
 
+@app.get('/users')
+def list_users():
+    """List users and show add form"""
+
+    users = User.query.all()
+    return render_template('current-users.html', users=users)
+
+
 @app.get('/users/new')
 def show_add_user_form():
     """ Display the form to add a user """
@@ -36,9 +44,9 @@ def create_display_user():
 
     first_name = request.form['first_name']
     last_name = request.form['last_name']
-    image_url = request.form['image_url'] if request.form['image_url'] else DEFAULT_IMAGE_URL
+    img_from_form = request.form['image_url']
+    image_url = img_from_form if img_from_form else DEFAULT_IMAGE_URL
 
-    #user = User(first_name=first_name, last_name=last_name, image_url= image_url)
     user = User(
         first_name=first_name,
         last_name=last_name,
@@ -50,14 +58,6 @@ def create_display_user():
     posts = user.posts
 
     return render_template('user.html', user=user, posts=posts)
-
-
-@app.get('/users')
-def list_users():
-    """List users and show add form"""
-
-    users = User.query.all()
-    return render_template('current-users.html', users=users)
 
 
 @app.get('/user/<int:id>')
@@ -82,7 +82,8 @@ def update_user(id):
     user = User.query.get_or_404(id)
     user.first_name = request.form['first_name']
     user.last_name = request.form['last_name']
-    user.image_url = request.form['image_url'] if request.form['image_url'] else DEFAULT_IMAGE_URL
+    img_from_form = request.form['image_url']
+    user.image_url = img_from_form if img_from_form else DEFAULT_IMAGE_URL
 
     db.session.commit()
     posts = user.posts
@@ -98,6 +99,7 @@ def delete_user(id):
     db.session.commit()
     return redirect('/')
 
+
 @app.get('/add-post/<int:id>')
 def display_add_post_form(id):
     """ Displays the form to add posts """
@@ -112,10 +114,10 @@ def add_display_post(id):
     content = request.form['content']
 
     post = Post(
-            title = title,
-            content = content,
-            created_at = None,
-            user_id = id
+        title=title,
+        content=content,
+        created_at=None,
+        user_id=id
     )
 
     user = User.query.get_or_404(id)
@@ -125,6 +127,7 @@ def add_display_post(id):
 
     return render_template('post.html', user=user, post=post)
 
+
 @app.get('/posts/<int:id>')
 def display_post(id):
     """displays post details"""
@@ -133,10 +136,11 @@ def display_post(id):
     user = post.user
     return render_template('post.html', post=post, user=user)
 
+
 @app.post('/posts/<int:id>/edit')
 def update_post(id):
     """ updating post details and render the posts page"""
-    
+
     post = Post.query.get_or_404(id)
     user = post.user
     post.title = request.form['title']
@@ -144,6 +148,7 @@ def update_post(id):
 
     db.session.commit()
     return render_template('post.html', post=post, user=user)
+
 
 @app.post('/posts/<int:id>/delete')
 def delete_post(id):
@@ -155,6 +160,7 @@ def delete_post(id):
     db.session.commit()
     posts = user.posts
     return render_template('user.html', user=user, posts=posts)
+
 
 @app.get('/posts/<int:id>/edit')
 def display_edit_post_form(id):

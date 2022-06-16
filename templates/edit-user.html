@@ -1,5 +1,6 @@
 {% extends "base.html" %} {% block title %}Edit User{% endblock %} {% block
 content %}
+<!-- Edit user page shown -->
 <form action="/user/{{ user.id }}/edit" method="POST">
   <p>First Name: <input name="first_name" value="{{ user.first_name }}" /></p>
   <p>Last Name: <input name="last_name" value="{{ user.last_name }}" /></p>
