@@ -4,7 +4,7 @@ from app import app, db
 from models import DEFAULT_IMAGE_URL, User
 
 # Let's configure our app to use a different database for tests
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql:///blogly_test"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql:///blogly_tests"
 
 # Make Flask errors be real errors, rather than HTML pages with error info
 app.config['TESTING'] = True
@@ -73,7 +73,7 @@ class UserViewTestCase(TestCase):
 
     def test_add_user(self):
         with self.client as c:
-            resp = c.post("/add-user")
+            resp = c.post("/add-user", data={'first_name': 'Jordan', 'last_name': 'Asano', 'image_url': ''})
             self.assertEqual(resp.status_code, 200)
             html = resp.get_data(as_text=True)
             self.assertIn("<!-- User page shown -->", html)

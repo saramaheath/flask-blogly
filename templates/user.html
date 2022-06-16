@@ -2,13 +2,17 @@
 block content %}
 <!-- User page shown -->
 <div>
-  <img src="{{ user.image_url}}" alt="User's profile pic" />
+  <img
+    src="{{ user.image_url}}"
+    alt="{{ user.first_name }} {{ user.last_name}}
+  profile pic"
+  />
   <p>{{user.first_name}} {{user.last_name}}</p>
   <form action="/user/{{ user.id }}/edit">
     <button>Edit</button>
-  </form>
-  <form action="/user/{{ user.id }}/delete" method="POST">
-    <button>Delete</button>
+    <button formaction="/user/{{ user.id }}/delete" formmethod="POST">
+      Delete
+    </button>
   </form>
 </div>
 {% endblock %}

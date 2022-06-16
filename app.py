@@ -1,7 +1,7 @@
 """Blogly application."""
 
 from flask import Flask, render_template, request, redirect
-from models import connect_db, User, db
+from models import connect_db, User, db, DEFAULT_IMAGE_URL
 from flask_debugtoolbar import DebugToolbarExtension
 
 app = Flask(__name__)
@@ -26,7 +26,7 @@ def redirect_to_users():
 @app.get('/users/new')
 def show_add_user_form():
     """ Display the form to add a user """
-    return render_template('list.html')
+    return render_template('add_user_form.html')
 
 @app.post('/add-user')
 def create_display_user():
@@ -34,7 +34,8 @@ def create_display_user():
 
     first_name = request.form['first_name']
     last_name = request.form['last_name']
-    image_url = request.form['image_url']
+    image_url = request.form['image_url'] if request.form['image_url'] else DEFAULT_IMAGE_URL
+
     #user = User(first_name=first_name, last_name=last_name, image_url= image_url)
     user = User(
         first_name=first_name,
@@ -74,7 +75,7 @@ def update_user(id):
     user = User.query.get_or_404(id)
     user.first_name = request.form['first_name']
     user.last_name = request.form['last_name']
-    user.image_url = request.form['image_url']
+    user.image_url = request.form['image_url'] if request.form['image_url'] else DEFAULT_IMAGE_URL
 
     db.session.commit()
     return render_template('user.html', user=user)

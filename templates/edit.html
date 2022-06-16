@@ -8,6 +8,6 @@ content %}
     <input type="url" name="image_url" value="{{ user.image_url }}" />
   </p>
   <button>Save</button>
-  <a href="/user/{{ user.id }}"></a>
+  <button formaction="/user/{{ user.id }}" formmethod="GET">Cancel</button>
 </form>
 {% endblock %}
