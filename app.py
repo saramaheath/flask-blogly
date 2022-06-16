@@ -16,17 +16,19 @@ app.config['SECRET_KEY'] = "SECRET!"
 connect_db(app)
 db.create_all()
 
+
 @app.get('/')
 def redirect_to_users():
     """List users and show add form"""
 
     return redirect('/users')
-    
+
 
 @app.get('/users/new')
 def show_add_user_form():
     """ Display the form to add a user """
     return render_template('add_user_form.html')
+
 
 @app.post('/add-user')
 def create_display_user():
@@ -39,7 +41,7 @@ def create_display_user():
     #user = User(first_name=first_name, last_name=last_name, image_url= image_url)
     user = User(
         first_name=first_name,
-        last_name=last_name, 
+        last_name=last_name,
         image_url=image_url
     )
 
@@ -48,6 +50,7 @@ def create_display_user():
 
     return render_template('user.html', user=user)
 
+
 @app.get('/users')
 def list_users():
     """List users and show add form"""
@@ -55,12 +58,14 @@ def list_users():
     users = User.query.all()
     return render_template('current-users.html', users=users)
 
+
 @app.get('/user/<int:id>')
 def display_user(id):
     """displays user details"""
 
     user = User.query.get_or_404(id)
     return render_template('user.html', user=user)
+
 
 @app.get('/user/<int:id>/edit')
 def display_edit_user(id):
@@ -79,7 +84,7 @@ def update_user(id):
 
     db.session.commit()
     return render_template('user.html', user=user)
-    
+
 
 @app.post('/user/<int:id>/delete')
 def delete_user(id):
@@ -88,3 +93,24 @@ def delete_user(id):
     db.session.delete(user)
     db.session.commit()
     return redirect('/')
+
+@app.get('/add-post/<int:id>')
+def display_add_post_form(id):
+    """ Displays the form to add posts """
+    user = User.query.get_or_404(id)
+    return render_template('add-post.html', user=user)
+
+
+@app.post('/add-post/<int:id>')
+def add_display_post(id):
+    """ Adds the post and displays it's page """
+    title = request.form['title']
+    content = request.form['content']
+
+    post = Post(
+            title = title,
+            content = content,
+            created_at = None,
+            user_id = id
+    )
+    return render_template('add-post.html', user=user)

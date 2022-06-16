@@ -18,6 +18,7 @@ app.config['DEBUG_TB_HOSTS'] = ['dont-show-debug-toolbar']
 
 db.create_all()
 
+
 class UserViewTestCase(TestCase):
     """Test views for users."""
 
@@ -58,7 +59,7 @@ class UserViewTestCase(TestCase):
             html = resp.get_data(as_text=True)
             self.assertIn("test_first", html)
             self.assertIn("test_last", html)
-    
+
     def test_home_page(self):
         with self.client as c:
             resp = c.get('/')
@@ -73,8 +74,8 @@ class UserViewTestCase(TestCase):
 
     def test_add_user(self):
         with self.client as c:
-            resp = c.post("/add-user", data={'first_name': 'Jordan', 'last_name': 'Asano', 'image_url': ''})
+            resp = c.post(
+                "/add-user", data={'first_name': 'Jordan', 'last_name': 'Asano', 'image_url': ''})
             self.assertEqual(resp.status_code, 200)
             html = resp.get_data(as_text=True)
             self.assertIn("<!-- User page shown -->", html)
-

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Add Post Form{% endblock %}
+
+{% block content %}
+<!-- Add user page shown -->
+<form action="/add-post/{{ user.id }}" method="POST">
+    <p>Title: <input name="title"/></p>
+    <p>Content: <input name="content"/></p>
+    <button formaction="/user/{{ user.id }}" formmethod="GET">Cancel</button>
+    <button>Add</button>
+</form>
+{% endblock %}
