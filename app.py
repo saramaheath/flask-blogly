@@ -1,7 +1,7 @@
 """Blogly application."""
 
 from flask import Flask, render_template, request, redirect
-from models import connect_db, User, db, DEFAULT_IMAGE_URL
+from models import connect_db, User, db, DEFAULT_IMAGE_URL, Post
 from flask_debugtoolbar import DebugToolbarExtension
 
 app = Flask(__name__)
@@ -27,7 +27,7 @@ def redirect_to_users():
 @app.get('/users/new')
 def show_add_user_form():
     """ Display the form to add a user """
-    return render_template('add_user_form.html')
+    return render_template('add-user-form.html')
 
 
 @app.post('/add-user')
@@ -47,8 +47,9 @@ def create_display_user():
 
     db.session.add(user)
     db.session.commit()
+    posts = user.posts
 
-    return render_template('user.html', user=user)
+    return render_template('user.html', user=user, posts=posts)
 
 
 @app.get('/users')
@@ -64,14 +65,15 @@ def display_user(id):
     """displays user details"""
 
     user = User.query.get_or_404(id)
-    return render_template('user.html', user=user)
+    posts = user.posts
+    return render_template('user.html', user=user, posts=posts)
 
 
 @app.get('/user/<int:id>/edit')
 def display_edit_user(id):
     """displays user edit page"""
     user = User.query.get_or_404(id)
-    return render_template('edit.html', user=user)
+    return render_template('edit-user.html', user=user)
 
 
 @app.post('/user/<int:id>/edit')
@@ -83,7 +85,9 @@ def update_user(id):
     user.image_url = request.form['image_url'] if request.form['image_url'] else DEFAULT_IMAGE_URL
 
     db.session.commit()
-    return render_template('user.html', user=user)
+    posts = user.posts
+
+    return render_template('user.html', user=user, posts=posts)
 
 
 @app.post('/user/<int:id>/delete')
@@ -98,7 +102,7 @@ def delete_user(id):
 def display_add_post_form(id):
     """ Displays the form to add posts """
     user = User.query.get_or_404(id)
-    return render_template('add-post.html', user=user)
+    return render_template('add-post-form.html', user=user)
 
 
 @app.post('/add-post/<int:id>')
@@ -113,4 +117,49 @@ def add_display_post(id):
             created_at = None,
             user_id = id
     )
-    return render_template('add-post.html', user=user)
+
+    user = User.query.get_or_404(id)
+
+    db.session.add(post)
+    db.session.commit()
+
+    return render_template('post.html', user=user, post=post)
+
+@app.get('/posts/<int:id>')
+def display_post(id):
+    """displays post details"""
+
+    post = Post.query.get_or_404(id)
+    user = post.user
+    return render_template('post.html', post=post, user=user)
+
+@app.post('/posts/<int:id>/edit')
+def update_post(id):
+    """ updating post details and render the posts page"""
+    
+    post = Post.query.get_or_404(id)
+    user = post.user
+    post.title = request.form['title']
+    post.content = request.form['content']
+
+    db.session.commit()
+    return render_template('post.html', post=post, user=user)
+
+@app.post('/posts/<int:id>/delete')
+def delete_post(id):
+    """ delete post and redirects to users page """
+    post = Post.query.get_or_404(id)
+    user = post.user
+
+    db.session.delete(post)
+    db.session.commit()
+    posts = user.posts
+    return render_template('user.html', user=user, posts=posts)
+
+@app.get('/posts/<int:id>/edit')
+def display_edit_post_form(id):
+    """ displays edit post form """
+
+    post = Post.query.get_or_404(id)
+
+    return render_template('edit-post.html', post=post)
