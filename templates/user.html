@@ -1,5 +1,6 @@
 {% extends "base.html" %} {% block title %}{{user.first_name}}{% endblock %} {%
 block content %}
+<!-- User page shown -->
 <div>
   <img src="{{ user.image_url}}" alt="User's profile pic" />
   <p>{{user.first_name}} {{user.last_name}}</p>

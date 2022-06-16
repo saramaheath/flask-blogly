@@ -58,3 +58,23 @@ class UserViewTestCase(TestCase):
             html = resp.get_data(as_text=True)
             self.assertIn("test_first", html)
             self.assertIn("test_last", html)
+    
+    def test_home_page(self):
+        with self.client as c:
+            resp = c.get('/')
+            self.assertEqual(resp.status_code, 302)
+
+    def test_users_new(self):
+        with self.client as c:
+            resp = c.get("/users/new")
+            self.assertEqual(resp.status_code, 200)
+            html = resp.get_data(as_text=True)
+            self.assertIn("<!-- Add user page shown -->", html)
+
+    def test_add_user(self):
+        with self.client as c:
+            resp = c.post("/add-user")
+            self.assertEqual(resp.status_code, 200)
+            html = resp.get_data(as_text=True)
+            self.assertIn("<!-- User page shown -->", html)
+
