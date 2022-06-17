@@ -150,6 +150,15 @@ def update_post(id):
     return render_template('post.html', post=post, user=user)
 
 
+@app.get('/posts/<int:id>/edit')
+def display_edit_post_form(id):
+    """ displays edit post form """
+
+    post = Post.query.get_or_404(id)
+
+    return render_template('edit-post.html', post=post)
+
+
 @app.post('/posts/<int:id>/delete')
 def delete_post(id):
     """ delete post and redirects to users page """
@@ -160,12 +169,3 @@ def delete_post(id):
     db.session.commit()
     posts = user.posts
     return render_template('user.html', user=user, posts=posts)
-
-
-@app.get('/posts/<int:id>/edit')
-def display_edit_post_form(id):
-    """ displays edit post form """
-
-    post = Post.query.get_or_404(id)
-
-    return render_template('edit-post.html', post=post)

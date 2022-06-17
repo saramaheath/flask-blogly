@@ -30,7 +30,6 @@ class UserViewTestCase(TestCase):
         # User model below.
         Post.query.delete()
         User.query.delete()
-        
 
         self.client = app.test_client()
 
@@ -38,10 +37,14 @@ class UserViewTestCase(TestCase):
                                     last_name="test_last",
                                     image_url=None)
 
+        test_post = Post(title="test_post_title",
+                         content="test_content",
+                         user_id=test_user.id)
+
         second_user = User(first_name="test_first_two", last_name="test_last_two",
                            image_url=None)
 
-        db.session.add_all([test_user, second_user])
+        db.session.add_all([test_user, second_user, test_post])
         db.session.commit()
 
         # We can hold onto our test_user's id by attaching it to self (which is
@@ -146,3 +149,50 @@ class UserViewTestCase(TestCase):
             self.assertIn('Yo', html)
             self.assertIn('hi', html)
 
+    def test_display_post(self):
+        with self.client as c:
+            post = Post.query.first()
+            resp = c.get(f"/posts/{post.id}")
+            self.assertEqual(resp.status_code, 200)
+            html = resp.get_data(as_text=True)
+            self.assertIn("<!-- Post page shown -->", html)
+            self.assertIn(post.title, html)
+            self.assertIn(post.content, html)
+
+    def test_edit_post(self):
+        with self.client as c:
+            post = Post.query.first()
+            resp = c.post(
+                f"/posts/{post.id}/edit",
+                data={
+                    'title': 'Hey There!',
+                    "content": "Buddy"}
+            )
+            self.assertEqual(resp.status_code, 200)
+            html = resp.get_data(as_text=True)
+            self.assertIn("<!-- Post page shown -->", html)
+            self.assertIn("Hey There!", html)
+            self.assertIn("Buddy", html)
+
+    def test_display_edit_post(self):
+        with self.client as c:
+            resp = c.get(f"/posts/{Post.query.first().id}/edit")
+            self.assertEqual(resp.status_code, 200)
+            html = resp.get_data(as_text=True)
+            self.assertIn("<!-- Edit post page shown -->", html)
+
+    def test_delete_post(self):
+        with self.client as c:
+            user = User.query.first()
+            post = Post(title="test_post_title",
+                         content="test_content",
+                         user_id=user.id)
+                         
+            db.session.add(post)
+            db.session.commit()
+
+            resp = c.post(f"/posts/{post.id}/delete")
+            self.assertEqual(resp.status_code, 200)
+            html = resp.get_data(as_text=True)
+            self.assertIn('<!-- User page shown -->', html)
+            self.assertNotIn(post.title, html)
